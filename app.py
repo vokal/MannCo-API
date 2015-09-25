@@ -83,12 +83,12 @@ def stats_over(days):
     for stat in kill_stats:
         player = stat['attacker']
         stats_by_steam_id[player].update(stat)
-        del stats_by_steam_id['attacker']
+        del stats_by_steam_id[player]['attacker']
 
     for stat in death_stats:
         player = stat['victim']
         stats_by_steam_id[player].update(stat)
-        del stats_by_steam_id['victim']
+        del stats_by_steam_id[player]['victim']
     return stats_by_steam_id
 
 
