@@ -51,9 +51,9 @@ DAILY_REVENGES_COUNT = """
 
 
 ROUTES = {
-  'daily-kills':        r'/player/<steamId>/daily-kills',
-  'all-players-stats':  r'/players',
-  'player-stat':        r'/player/<steamId>',
+  'daily-kills':        r'/v1/player/<steamId>/daily-kills',
+  'all-players-stats':  r'/v1/players',
+  'player-stat':        r'/v1/player/<steamId>',
   'root':               r'/',
 }
 
