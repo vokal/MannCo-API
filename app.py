@@ -1,7 +1,7 @@
-import signal # signal-related #@$#
-import sys
+from collections import defaultdict
+import signal   # signal-related #@$#
+import sys      # ditto
 
-import json
 
 from bottle import run, Bottle, request, response
 app = Bottle()
@@ -21,37 +21,28 @@ SELECT *
 FROM Player;
 """
 
-DAILY_KILL_COUNT = """
-	SELECT COUNT(*) AS value
-	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
-	AND    attacker = %s
+KILL_STATS_OVER_DAYS = """
+SELECT
+  attacker, COUNT(*) AS kills,
+  SUM(dominated) AS dominations,
+  SUM(revenge) AS revenges
+FROM killlog
+WHERE FROM_UNIXTIME(killtime) >= NOW() - INTERVAL %s DAY
+GROUP BY attacker
 """
 
-DAILY_DEATH_COUNT = """
-	SELECT COUNT(*) AS value
-	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
-	AND    victim = %s
-"""
-
-DAILY_DOMINATIONS_COUNT = """
-	SELECT SUM(dominated) AS value
-	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
-	AND    attacker = %s
-"""
-
-DAILY_REVENGES_COUNT = """
-	SELECT SUM(revenge) AS value
-	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
-	AND    attacker = %s
+DEATH_STATS_OVER_DAYS = """
+SELECT
+  victim, COUNT(*) AS deaths,
+  SUM(dominated) AS dominated
+FROM killlog
+WHERE FROM_UNIXTIME(killtime) >= NOW() - INTERVAL %s DAY
+GROUP BY victim
 """
 
 
 ROUTES = {
-  'daily-kills':        r'/v1/player/<steamId>/daily-kills',
+  'stats-over-days':    r'/v1/stats-over-days/<days:float>',
   'all-players-stats':  r'/v1/players',
   'player-stat':        r'/v1/player/<steamId>',
   'root':               r'/',
@@ -80,25 +71,23 @@ def all_player_stats():
     return {"results": players}
 
 
-@app.route(ROUTES['player-stat'])
-def player_stats(steamId):
-    print("steamId:", steamId)
-    player = sql("SELECT * FROM Player WHERE steamId = %s", steamId)[0]
-    return {"result": player}
+@app.route(ROUTES['stats-over-days'])
+def stats_over(days):
+    if days < 1:
+        return {"GT": "FO"}
 
+    kill_stats = sql(KILL_STATS_OVER_DAYS, days)
+    death_stats = sql(DEATH_STATS_OVER_DAYS, days)
+    stats_by_steam_id = defaultdict(dict)
 
-@app.route(ROUTES['daily-kills'])
-def daily_kills(steamId):
-    result = {}
+    for stat in kill_stats:
+        player = stat['attacker']
+        stats_by_steam_id[player].update(stat)
 
-    # TODO: make this suck less
-    result['kills'] = int(sql_value(DAILY_KILL_COUNT, steamId))
-    result['deaths'] = int(sql_value(DAILY_DEATH_COUNT, steamId))
-    result['dominations'] = int(sql_value(DAILY_DOMINATIONS_COUNT, steamId))
-    result['revenges'] = int(sql_value(DAILY_REVENGES_COUNT, steamId))
-    print(result)
-
-    return {"result": result}
+    for stat in death_stats:
+        player = stat['victim']
+        stats_by_steam_id[player].update(stat)
+    return stats_by_steam_id
 
 
 if __name__ == '__main__':
