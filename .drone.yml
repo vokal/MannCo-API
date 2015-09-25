@@ -8,6 +8,7 @@ env:
         - WEB_DOMAIN=$$webDomain
 
 script:
+    - apt-get update -qq && apt-get -y -qq install wget sudo
     - /bin/true
 
 publish:
