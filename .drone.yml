@@ -8,7 +8,8 @@ env:
         - WEB_DOMAIN=$$webDomain
 
 script:
-    - apt-get update -qq && apt-get -y -qq install wget sudo
+    # sudo and wget are needed by drone, fabric needed to deploy
+    - apt-get update -qq && apt-get -y -qq install wget sudo fabric
     - /bin/true
 
 publish:
