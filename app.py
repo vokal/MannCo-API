@@ -24,28 +24,28 @@ FROM Player;
 DAILY_KILL_COUNT = """
 	SELECT COUNT(*) AS value
 	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 2 DAY
+	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
 	AND    attacker = %s
 """
 
 DAILY_DEATH_COUNT = """
 	SELECT COUNT(*) AS value
 	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 2 DAY
+	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
 	AND    victim = %s
 """
 
 DAILY_DOMINATIONS_COUNT = """
 	SELECT SUM(dominated) AS value
 	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 2 DAY
+	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
 	AND    attacker = %s
 """
 
 DAILY_REVENGES_COUNT = """
 	SELECT SUM(revenge) AS value
 	FROM   killlog
-	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 2 DAY
+	WHERE  FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 1 DAY
 	AND    attacker = %s
 """
 
@@ -102,4 +102,4 @@ def daily_kills(steamId):
 
 
 if __name__ == '__main__':
-    run(app, host='0.0.0.0', port=3000, debug=True)
+    run(app, host='0.0.0.0', port=8000, debug=True)
