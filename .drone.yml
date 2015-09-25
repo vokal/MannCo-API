@@ -1,4 +1,4 @@
-image: docker.vokal.io/python:3
+image: docker.vokal.io/python:2.7
 env:
         - AWS_ACCESS_KEY=$$awsAccessKey
         - AWS_SECRET_KEY=$$awsSecretKey
@@ -9,10 +9,23 @@ env:
 
 script:
     - /bin/true
+
+publish:
+    docker:
+        docker_host: tcp://docker-build.vokal.io:2375
+        docker_version: 1.4.1
+        registry_login_url: https://docker.vokal.io/v1/
+        registry_login: true
+        username: $$dockerUsername
+        password: $$dockerPassword
+        email: scott.ferguson@vokalinteractive.com
+        image_name: docker.vokal.io/tf2stats
+        tags: [latest]
+
 deploy:
   bash:
       script:
-        - fab staging update create_image
+        - fab staging update
 
 notify:
     webhook:
