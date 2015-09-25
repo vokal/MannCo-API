@@ -1,0 +1,19 @@
+env:
+        - AWS_ACCESS_KEY=$$awsAccessKey
+        - AWS_SECRET_KEY=$$awsSecretKey
+        - STAGING_DATABASE_URL=$$stagingDatabaseUrl
+        - DATABASE_URL=postgres://postgres@localhost
+        - SECRET_KEY=$$secretKey
+        - WEB_DOMAIN=$$webDomain
+
+deploy:
+  bash:
+      script:
+        - fab staging update create_image
+
+notify:
+    webhook:
+        urls:
+            - https://dronebot.vokal.io/hook
+        on_success: true
+        on_failure: true
