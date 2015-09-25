@@ -3,12 +3,6 @@ from fabric.api import *
 from fabric.operations import *
 
 
-from boto import ec2
-
-
-import os
-from datetime import date
-
 STAGING_IP = "tf2stats.vokal.io"
 
 
