@@ -6,6 +6,8 @@ env:
         - SECRET_KEY=$$secretKey
         - WEB_DOMAIN=$$webDomain
 
+script:
+    - /bin/true
 deploy:
   bash:
       script:
