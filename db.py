@@ -34,11 +34,10 @@ atexit.register(lambda: connection.close())
 
 ## so I don't have to care about cursors
 def sql(*args):
+    connection.ping(True)
     with connection.cursor() as cursor:
         cursor.execute(*args)
         return cursor.fetchall()
 
 def sql_value(*args):
-    with connection.cursor() as cursor:
-        cursor.execute(*args)
-        return cursor.fetchone().get('value')
+    return sql(*args)[0].get('value')
