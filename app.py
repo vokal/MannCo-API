@@ -40,11 +40,21 @@ WHERE FROM_UNIXTIME(killtime) >= NOW() - INTERVAL %s DAY
 GROUP BY victim
 """
 
+PLAYER_KILL_STATS_OVER_DAYS = """
+SELECT SUM(CASE when attacker=%s then 1 else 0 end) as kills,
+       SUM(CASE when victim=%s then 1 else 0 end) as deaths,
+       SUM(CASE when assister=%s then 1 else 0 end) as assists,
+       SUM(CASE when attacker=%s AND dominated=1 then 1 else 0 end) as dominations,
+       SUM(CASE when attacker=%s AND revenge=1 then 1 else 0 end) as revenges
+FROM killlog
+WHERE FROM_UNIXTIME(killtime) >= NOW() - INTERVAL 18 HOUR
+"""
+
 
 ROUTES = {
   'stats-over-days':    r'/v1/stats-over-days/<days:float>',
   'all-players-stats':  r'/v1/players',
-  'player-stat':        r'/v1/player/<steamId>',
+  'player-stat':        r'/v1/player/<steamid>',
   'root':               r'/',
 }
 
@@ -90,6 +100,17 @@ def stats_over(days):
         stats_by_steam_id[player].update(stat)
         del stats_by_steam_id[player]['victim']
     return stats_by_steam_id
+
+@app.route(ROUTES['player-stat'])
+def player_stats(steamid):
+    player_stats = sql(PLAYER_KILL_STATS_OVER_DAYS, (steamid, steamid, steamid, steamid, steamid))
+    
+    resp = player_stats[0]
+    for k, v in resp.items():
+        if v == None:
+            resp[k] = 0
+
+    return resp
 
 
 if __name__ == '__main__':
